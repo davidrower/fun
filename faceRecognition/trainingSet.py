@@ -1,12 +1,12 @@
-#
-# Purpose: Generates a set of training images to be
-#          used for facial recognition
-#
-# Usage:   python trainingSet.py <label name>
-#
-# Author:  David Rower
-# Date:    January 7, 2017
-#
+'''
+  Purpose: Generates a set of training images to be
+           used for facial recognition
+ 
+  Usage:   python trainingSet.py <label name>
+ 
+  Author:  David Rower
+  Date:    January 7, 2017
+'''
 
 from glob import glob
 import sys, os
