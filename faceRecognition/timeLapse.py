@@ -1,13 +1,13 @@
-#
-# Purpose: Take time-lapse photos from webcamera
-#          for facial recognition training
-#
-# Usage:   Press c to capture a picture
-#          Press q to quit the program
-#
-# Author:  David Rower
-# Date:    January 7, 2017
-#
+'''
+  Purpose: Take time-lapse photos from webcamera
+           for facial recognition training
+ 
+  Usage:   Press c to capture a picture
+           Press q to quit the program
+ 
+  Author:  David Rower
+  Date:    January 7, 2017
+'''
 
 import cv2
 
