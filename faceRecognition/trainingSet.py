@@ -14,10 +14,10 @@ import cv2, Image
 import numpy as np
 
 # facial detection using haarcascades from openCV
-def detectFaces(image):
+def detectFaces(image,faceCascade):
     flag = cv2.cv.CV_HAAR_SCALE_IMAGE
     faces = faceCascade.detectMultiScale(
-                        gray,
+                        image,
                         scaleFactor=1.1,
                         minNeighbors=5,
                         minSize=(60, 60),
@@ -34,7 +34,23 @@ def checkDirectory():
         images.extend(glob("{0}/*.{1}".format(directory,extension)))
     return directory, cascade, images
 
+# iterate through image path names, append faces to a training set
+def createTrainingSet(images,faceCascade):
+    trainingSet = []
+    for imagePath in images:
+        color = cv2.imread(imagePath)
+        gray  = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
+        faces = detectFaces(gray,faceCascade)  
+        print("Faces found: {}".format(len(faces)))
+        for (x,y,w,h) in faces: 
+            cv2.rectangle(color, (x,y), (x+w,y+h), (100,255,0),2)
+            cv2.imshow('Face', color)
+            cv2.waitKey(100)
+            trainingSet.append(cv2.equalizeHist(gray[x:x+w,y:y+h]))
+    return trainingSet
+
 if __name__ == "__main__":
+    # find directory and important file paths
     directory, cascade, images = checkDirectory()
     print("Directory: {}/".format(directory))
 
@@ -49,19 +65,12 @@ if __name__ == "__main__":
 
     print("Cascade used: {}".format(cascade[0]))
     print("Training set: {}".format(len(images)))
+    
+    label = raw_input("Label? ")
+    trainingSet = createTrainingSet(images,faceCascade)
+    cv2.destroyAllWindows()
 
-    # iterate through images, and append all faces to a training set
-    trainingSet = []
-    for imagePath in images:
-        color = cv2.imread(imagePath)
-        gray  = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
-        faces = detectFaces(gray)  
-        print("Faces found: {}".format(len(faces)))
-        for (x,y,w,h) in faces: 
-            cv2.rectangle(color, (x,y), (x+w,y+h), (100,255,0),2)
-            cv2.imshow('Face', color)
-            cv2.waitKey(1000)
-            trainingSet.append(cv2.equalizeHist(gray))
+    
 
              
 
