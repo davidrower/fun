@@ -47,7 +47,6 @@ def createTrainingSet(images,faceCascade):
             gray  = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
             gray  = cv2.equalizeHist(gray)
             faces = detectFaces(gray,faceCascade)  
-#            print("Faces found: in {0}: {1}".format(imagePath,len(faces)))
             for (x,y,w,h) in faces: 
                 cv2.imshow('Face', gray[y:y+h,x:x+w])
                 cv2.waitKey(100)
@@ -59,9 +58,7 @@ def createTrainingSet(images,faceCascade):
 if __name__ == "__main__":       
     # find directory and important file paths
     directory, cascade, images = checkDirectory()
-    names = [key.split('/')[-2] for key in images.keys()]
     print("Directory: {}/".format(directory))
-    print("People: {}".format(names))
 
     # quits if no cascade or image files are found
     if not cascade: 
@@ -75,22 +72,36 @@ if __name__ == "__main__":
 
     # creates the training set given dictionary of image file paths
     trainingSet, labels = createTrainingSet(images,faceCascade)
+
+    # create a list of names of corresponding to each label
+    names = [key.split('/')[-2] for key in images.keys()]
+    print("People: {}".format(names))
     for label in np.unique(labels): 
         imageNumber = labels.count(label)
         print("{}: {} training images".format(names[label],imageNumber))
     cv2.destroyAllWindows()
 
-    faceRecognizer = cv2.createLBPHFaceRecognizer()
+    faceRecognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,200)
     faceRecognizer.train(trainingSet,np.array(labels))
 
-    color = cv2.imread(images[0])
-    print("Test on {}".format(images[0]))
+    testPath = "./test4.jpg"
+    color = cv2.imread(testPath)
+    print("Test on {}".format(testPath))
     gray  = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
     gray  = cv2.equalizeHist(gray)
     faces = detectFaces(gray,faceCascade) 
+    print("Faces found: in {0}: {1}".format(testPath,len(faces)))
+    textColor = (100, 255, 0)
+    font = cv2.FONT_HERSHEY_SIMPLEX
     for (x,y,w,h) in faces: 
         prediction, confidence = faceRecognizer.predict(gray[y:y+h,x:x+w])
-        print("Prediction: {0}, Confidence: {1}".format(prediction,confidence))
+        print("Prediction: {0}, Confidence: {1}".format(names[prediction],confidence))
+        cv2.rectangle(color, (x,y), (x+w,y+h), textColor, 2)
+        cv2.putText(color, names[prediction], (x, y-10), font, 1, textColor, 2)
+    while True: 
+        cv2.imshow('Face Recognition', color)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
 
 
