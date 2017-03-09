@@ -9,20 +9,23 @@ Author:  David Rower
 Date:    Sun Dec 25 04:29:27 2016
 """
 
+print(__doc__)
+
 import numpy as np
 from matplotlib import pyplot as py
 import mpl_toolkits.mplot3d.axes3d as p3
 import matplotlib.animation as animation
 
-# creates the arrays used to keep track of N particles
 def createParticles(N):
-    positions  = 2*np.random.rand(N,3)-1.
+    """ Creates the arrays used to keep track of N particles. """
+    positions  = 2 * np.random.rand(N,3) - 1.
     velocities = np.zeros((N,3))
     forces     = np.zeros((N,3))
-    return positions, velocities, forces
+    annealForces = np.zeros((N,3))
+    return positions, velocities, forces, annealForces
 
-# creates an array of shape (N,3) consisting of forces felt by each particle 
 def allForces(positions): 
+    """ Creates an array of shape (N,3) of forces felt by each particle. """ 
     forces = np.zeros((N,3))
     for i in range(N-1): 
         for j in range(i+1,N):
@@ -31,27 +34,31 @@ def allForces(positions):
             forces[j] -= f
     return forces
 
-# calculates the force between two particles (Newton's third law applies)
 def force(i,j,positions): 
+    """ Calculates force between two particles (Newton's 3rd law applies). """
     r1,r2 = positions[i],positions[j]
-    rVec  = r1-r2
+    rVec  = r1 - r2
     r     = np.linalg.norm(rVec)
-    fVec  = rVec/r**3
+    fVec  = rVec / r**3
     return fVec
 
-# updates positions and velocities according to the velocity Verlet algorithm
 def velocityVerlet(positions, velocities, forces):
+    """ Updates state according to the velocity Verlet algorithm. """
     velocities += forces * .5 * dt                  # velocities to n+.5
     positions  += velocities * dt                   # positions to n+1
     norms       = np.linalg.norm(positions,axis=1)  # confines particles to 
-    positions   = positions/norms[:,np.newaxis]     # surface of unit sphere
+    positions   = positions / norms[:,np.newaxis]     # surface of unit sphere
     forces      = allForces(positions)              # forces re-calculated
     velocities += forces * 0.5 * dt                 # velocities to n+1
     return positions, velocities, forces
 
 def animate(i):
-    global positions, velocities, forces
+    """ Function to update the data to be plotted in frame i. """
+    global positions, velocities, forces, annealForces
     positions, velocities, forces = velocityVerlet(positions,velocities,forces)
+    annealForces = np.random.randn(len(positions),3)
+    norms   = np.linalg.norm(annealForces,axis=1)         
+    forces += 10. * annealForces/norms[:,np.newaxis] 
     for index, value in enumerate(positions):
         x, y, z = positions[index][0], positions[index][1], positions[index][2]
         pts[index].set_data(x,y)
@@ -65,7 +72,7 @@ def init():
     return pts
 
 def createAnimation(N, dt): 
-    global pts, positions, velocities, forces
+    global pts, positions, velocities, forces, annealForces
     
     # create our figure and 3d axis
     fig = py.figure()
@@ -80,14 +87,14 @@ def createAnimation(N, dt):
     ax.set_zlabel('Z')    
    
     # create the arrays to keep track of our particles
-    positions, velocities, forces = createParticles(N)
+    positions, velocities, forces, annealForces = createParticles(N)
 
     # pts is modified in the animation object
     pts = sum([ax.plot([], [], [], 'o', markersize=8, color='k')
            for i in range(N)], [])
 
     # Creating the Animation object
-    ani = animation.FuncAnimation(fig, animate, init_func = init, frames = 100,
+    ani = animation.FuncAnimation(fig, animate, init_func = init,
                                                 interval=.1, blit=True)
                                   
     # Create and plot a unit sphere
