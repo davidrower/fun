@@ -48,7 +48,8 @@ def createTrainingSet(images,faceCascade):
             gray  = cv2.equalizeHist(gray)
             faces = detectFaces(gray,faceCascade)  
             for (x,y,w,h) in faces: 
-                cv2.imshow('Face', gray[y:y+h,x:x+w])
+                face = cv2.resize(gray[y:y+h,x:x+w],(100,100), interpolation = cv2.INTER_CUBIC)
+                cv2.imshow('Face', face)
                 cv2.waitKey(100)
                 trainingSet.append(gray[y:y+h,x:x+w])
                 labels.append(index)
@@ -81,23 +82,28 @@ if __name__ == "__main__":
         print("{}: {} training images".format(names[label],imageNumber))
     cv2.destroyAllWindows()
 
-    faceRecognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,200)
+    faceRecognizer = cv2.createLBPHFaceRecognizer(1,8,8,8,123.0)
     faceRecognizer.train(trainingSet,np.array(labels))
 
-    testPath = "./test4.jpg"
+    testPath = "./test5.jpg"
     color = cv2.imread(testPath)
     print("Test on {}".format(testPath))
     gray  = cv2.cvtColor(color, cv2.COLOR_BGR2GRAY)
     gray  = cv2.equalizeHist(gray)
     faces = detectFaces(gray,faceCascade) 
     print("Faces found: in {0}: {1}".format(testPath,len(faces)))
-    textColor = (100, 255, 0)
+    trueColor = (100, 255, 0)
+    falseColor = (255, 100, 0)
     font = cv2.FONT_HERSHEY_SIMPLEX
     for (x,y,w,h) in faces: 
+        face = cv2.resize(gray[y:y+h,x:x+w],(100,100), interpolation = cv2.INTER_CUBIC)
         prediction, confidence = faceRecognizer.predict(gray[y:y+h,x:x+w])
-        print("Prediction: {0}, Confidence: {1}".format(names[prediction],confidence))
-        cv2.rectangle(color, (x,y), (x+w,y+h), textColor, 2)
-        cv2.putText(color, names[prediction], (x, y-10), font, 1, textColor, 2)
+        if confidence > 0:
+              print("Prediction: {0}, Confidence: {1}".format(names[prediction],confidence))
+              cv2.rectangle(color, (x,y), (x+w,y+h), trueColor, 2)
+              cv2.putText(color, names[prediction], (x, y-10), font, 1, trueColor, 2)
+        else: 
+              cv2.rectangle(color, (x,y), (x+w,y+h), falseColor, 2)
     while True: 
         cv2.imshow('Face Recognition', color)
         if cv2.waitKey(1) & 0xFF == ord('q'):
