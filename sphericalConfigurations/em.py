@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 """
 Purpose: Simulate charged particles confined to the surface of a sphere
          to find minimum energy configurations. The code does not account 
@@ -58,7 +58,7 @@ def animate(i):
     positions, velocities, forces = velocityVerlet(positions,velocities,forces)
     annealForces = np.random.randn(len(positions),3)
     norms   = np.linalg.norm(annealForces,axis=1)         
-    forces += 10. * annealForces/norms[:,np.newaxis] 
+    forces += 10./(i+1) * annealForces/norms[:,np.newaxis] 
     for index, value in enumerate(positions):
         x, y, z = positions[index][0], positions[index][1], positions[index][2]
         pts[index].set_data(x,y)
