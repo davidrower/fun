@@ -1,5 +1,7 @@
-This is an idea I wanted to work on for a long time, and I finally realized it during my sophomore winter break.
+# Coulombic N-Body Simulation on Sphere
 
-It is a simple simulation of charged particles on the surface of a sphere. The idea is to solve for those pretty molecular geometries you see in chemistry with this simulation rather than doing things analytically.
+This is an idea I wanted to work on for a long time, and I finally realized it during my sophomore winter break. It is a simple simulation of charged particles on the surface of a sphere. The idea is to empirically solve for those stable and meta-stable configurations of N particles on a sphere, which are provoking and entertaining to look at!
 
-I think the result is fun and interesting, hope you enjoy!
+## Some Details 
+
+I use a Verlet style integrator to update particle positions and momenta. I have also updated a rather bootstrap-y annealing force in order to help the particles find more energertically favorable configurations.
